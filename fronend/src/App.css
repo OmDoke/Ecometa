@@ -1,0 +1,36 @@
+/* App.css */
+.App {
+  text-align: center;
+  font-family: Arial, sans-serif; /* Add a base font family */
+}
+
+/* Remove default animation and logo styles */
+.App-logo {
+  display: none;
+}
+
+/* Remove default background and header styles */
+.App-header {
+  background-color: #fff; /* Use white or any other background color you prefer */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Align components to the top */
+  padding-top: 20px; /* Add some padding to top for space */
+  color: #333; /* Adjust text color */
+}
+
+/* Optional: Remove the default link styles */
+.App-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Optional: Style global body background */
+body {
+  background-color: #f4f4f4; /* Set a global background color for the app */
+  margin: 0;
+  padding: 0;
+}
+
