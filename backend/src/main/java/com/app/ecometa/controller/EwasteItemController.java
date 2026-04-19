@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/ewaste")
-@CrossOrigin(origins = "http://localhost:3000") // Allow frontend access
 public class EwasteItemController {
 
     private static final Logger logger = Logger.getLogger(EwasteItemController.class.getName());
@@ -37,7 +36,8 @@ public class EwasteItemController {
     @Autowired
     private EmailService emailService;
 
-    // ✅ Submit new e-waste entry
+    // ── Submit new e-waste entry ──────────────────────────────────────────────
+
     @PostMapping("/submit")
     public ResponseEntity<String> submitEwaste(@RequestBody EwasteItem ewasteItem) {
         if (ewasteItem.getUser() == null || ewasteItem.getUser().getId() == null) {
@@ -54,29 +54,34 @@ public class EwasteItemController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid User ID!");
     }
 
-    // ✅ Get all e-waste submissions for a user
+    // ── Get all e-waste submissions for a user ────────────────────────────────
+
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<EwasteItem>> getUserEwaste(@PathVariable Long userId) {
+    public ResponseEntity<List<EwasteItem>> getUserEwaste(@PathVariable String userId) {
         Optional<User> userOptional = userRepo.findById(userId);
         return userOptional
                 .map(user -> ResponseEntity.ok(ewasteItemRepo.findByUser(user)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // ✅ Recycler Dashboard - Get pending e-waste items
+    // ── Recycler Dashboard - Get pending e-waste items ────────────────────────
+
     @GetMapping("/recycler")
     public ResponseEntity<List<EwasteItem>> getPendingEwasteForRecyclers() {
         return ResponseEntity.ok(ewasteItemRepo.findByStatus(Status.PENDING));
     }
 
-    // ✅ Recycler accepts e-waste & checks for certificate eligibility
+    // ── Recycler accepts e-waste ──────────────────────────────────────────────
+
     @PutMapping("/accept/{ewasteId}")
-    public ResponseEntity<String> acceptEwaste(@PathVariable Long ewasteId, @RequestParam Long recyclerId) {
+    public ResponseEntity<String> acceptEwaste(@PathVariable String ewasteId,
+                                                @RequestParam String recyclerId) {
         Optional<EwasteItem> ewasteOptional = ewasteItemRepo.findById(ewasteId);
         Optional<User> recyclerOptional = userRepo.findById(recyclerId);
 
         if (ewasteOptional.isEmpty() || recyclerOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid e-waste ID or recycler ID!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Invalid e-waste ID or recycler ID!");
         }
 
         EwasteItem ewasteItem = ewasteOptional.get();
@@ -84,54 +89,56 @@ public class EwasteItemController {
         ewasteItem.setStatus(Status.RECYCLED);
         ewasteItemRepo.save(ewasteItem);
 
-        // ✅ Calculate total recycled amount
+        // Calculate total recycled amount for user
         User user = ewasteItem.getUser();
         int totalRecycled = ewasteItemRepo.findByUserAndStatus(user, Status.RECYCLED)
-                                          .stream()
-                                          .mapToInt(EwasteItem::getQuantity)
-                                          .sum();
+                .stream()
+                .mapToInt(EwasteItem::getQuantity)
+                .sum();
 
-        // ✅ Generate certificate if the user has recycled at least 1 unit
+        user.setRecycledAmount(totalRecycled);
+
+        // Generate certificate if at least 1 unit recycled
         if (totalRecycled >= 1) {
             user.setCertified(true);
             userRepo.save(user);
 
-            // ✅ Generate PDF certificate
             ByteArrayOutputStream certificate = certificateService.generateCertificate(user, totalRecycled);
-
-            // ✅ Send certificate via email
             emailService.sendCertificate(user.getEmail(), certificate);
 
             return ResponseEntity.ok("E-Waste marked as recycled! Certificate sent to user.");
         }
 
+        userRepo.save(user);
         return ResponseEntity.ok("E-Waste marked as recycled!");
     }
 
-    // ✅ Recycler rejects e-waste
-    // ✅ Recycler rejects e-waste
-@PutMapping("/reject/{ewasteId}")
-public ResponseEntity<String> rejectEwaste(@PathVariable Long ewasteId, @RequestParam Long recyclerId) {
-    Optional<EwasteItem> ewasteOptional = ewasteItemRepo.findById(ewasteId);
-    Optional<User> recyclerOptional = userRepo.findById(recyclerId);
+    // ── Recycler rejects e-waste ──────────────────────────────────────────────
 
-    if (ewasteOptional.isEmpty() || recyclerOptional.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid e-waste ID or recycler ID!");
+    @PutMapping("/reject/{ewasteId}")
+    public ResponseEntity<String> rejectEwaste(@PathVariable String ewasteId,
+                                                @RequestParam String recyclerId) {
+        Optional<EwasteItem> ewasteOptional = ewasteItemRepo.findById(ewasteId);
+        Optional<User> recyclerOptional = userRepo.findById(recyclerId);
+
+        if (ewasteOptional.isEmpty() || recyclerOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Invalid e-waste ID or recycler ID!");
+        }
+
+        EwasteItem ewasteItem = ewasteOptional.get();
+        ewasteItem.setRecycler(recyclerOptional.get());
+        ewasteItem.setStatus(Status.CANCELLED);
+        ewasteItemRepo.save(ewasteItem);
+
+        try {
+            emailService.sendRejectionEmail(ewasteItem.getUser().getEmail(),
+                    ewasteItem.getType().name());
+            return ResponseEntity.ok("E-Waste submission rejected and user notified.");
+        } catch (Exception e) {
+            logger.severe("Error sending rejection email: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("E-Waste rejected, but email notification failed.");
+        }
     }
-
-    EwasteItem ewasteItem = ewasteOptional.get();
-    ewasteItem.setRecycler(recyclerOptional.get());
-    ewasteItem.setStatus(Status.CANCELLED);
-    ewasteItemRepo.save(ewasteItem);
-
-    // ✅ Convert EwasteType to String before sending the email
-    try {
-        emailService.sendRejectionEmail(ewasteItem.getUser().getEmail(), ewasteItem.getType().name());
-        return ResponseEntity.ok("E-Waste submission rejected and user notified.");
-    } catch (Exception e) {
-        logger.severe("Error sending rejection email: " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("E-Waste rejected, but email notification failed.");
-    }
-}
-
 }

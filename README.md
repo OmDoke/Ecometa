@@ -1,119 +1,115 @@
-Ecometa: A Waste Management Initiative
+# ♻️ Ecometa: The Intelligent E-Waste Circular Economy
 
-Introduction
+**Ecometa** is a state-of-the-art waste management platform designed to bridge the gap between individual e-waste generators and certified recycling centers. By providing a transparent, traceable, and rewarding ecosystem, Ecometa ensures that hazardous electronic waste is disposed of responsibly, promoting a cleaner and greener environment.
 
-Ecometa is a web-based platform designed to promote sustainable waste management by connecting individuals and businesses with recyclers. It functions as an online marketplace where users can buy, sell, and recycle e-waste and scrap materials. The platform ensures responsible waste disposal while encouraging a circular economy.
+---
 
-Tech Stack
+## 🚀 The Vision
+Every year, millions of tons of e-waste end up in landfills, leaking toxic chemicals into the soil. **Ecometa** digitizes the recycling process, allowing users to schedule pickups, track their environmental impact, and receive official recycling certificates.
 
-Frontend: React.js (Axios for API calls, React Router for navigation)
+---
 
-Backend: Spring Boot (Spring MVC, Spring Data JPA, REST API)
+## 🛠️ Technology Stack
 
-Database: MySQL
+| Layer | Technology | Details |
+| :--- | :--- | :--- |
+| **Frontend** | React.js | Vibrant, responsive UI with modern state management. |
+| **Backend** | Spring Boot 3.2.4 | Robust REST API built on the enterprise-grade Java framework. |
+| **Database** | MongoDB Atlas | Cloud-native NoSQL database for high scalability and flexibility. |
+| **Security** | Spring Security | BCrypt password hashing and role-based access control (RBAC). |
+| **Reporting** | iText PDF | Automated generation of Recycling Certificates. |
+| **Email** | Gmail SMTP | Real-time notifications for status updates. |
 
-Features
+---
 
-User Authentication & Role-Based Access: Signup/Login with different roles (Admin, Recycler Buyer, Recycler Seller)
+## 👥 User Personas & Workflows
 
-Product Listing: Users can add e-waste products for sale
+### 1. 🏠 The Individual (User)
+**Who is it?** Households or small businesses with old gadgets (phones, laptops, batteries).
 
-Recycler Management: Recyclers can register and list their services
+**The Workflow:**
+1.  **Onboarding**: Secure registration and login using encrypted credentials.
+2.  **Submission**: Upload e-waste details (type, quantity, condition, and location).
+3.  **Live Updates**: Track the status of the item (Submitted → Accepted → Collected).
+4.  **Reward**: Once collected, the user's "Recycled Count" increases.
+5.  **Certification**: Download an official **Recycling Certificate** to prove environmental contribution.
 
-Region-Based Product Filtering: Buyers see only products available in their region
+### 2. 🚛 The Certified Recycler
+**Who is it?** Verified recycling facilities looking to source raw materials for processing.
 
-Order Processing: Buyers can purchase products, and sellers can track sales
+**The Workflow:**
+1.  **Verification**: Login to a dedicated Recycler Dashboard.
+2.  **Discovery**: View all pending e-waste submissions in their region.
+3.  **Action**: Inspect details and choose to **Accept** or **Reject** a pickup request.
+4.  **Collection**: Mark items as **Collected** once the physical pickup is completed.
+5.  **Dashboard Analytics**: Track total units collected and impact metrics.
 
-Admin Dashboard: View recycler details, seller details, and process orders
+### 3. 🛡️ The System Administrator
+**The Workflow:**
+1.  **Monitoring**: Access global reports on recycling activity across the platform.
+2.  **Audit**: Ensure items are being processed fairly and recyclers are active.
 
-Logout Functionality: Secure user session management
+---
 
-Installation & Setup
+## 📊 App Flow (Lifecycle)
 
-Prerequisites
+```mermaid
+graph TD
+    A[User Registers/Logs In] --> B[User Submits E-Waste Form]
+    B --> C{Recycler Dashboard}
+    C -->|Rejects| D[Item Returns to Queue]
+    C -->|Accepts| E[Status: Accepted]
+    E --> F[Physical Pickup & Inspection]
+    F --> G[Recycler Marks Completed]
+    G --> H[User Notified & Downloads PDF Certificate]
+    H --> I[Total Recycled Count Increases]
+```
 
-Node.js (for frontend)
+---
 
-Java JDK 17+ (for Spring Boot backend)
+## ⚙️ Installation & Local Setup
 
-MySQL Server (for database storage)
+### Prerequisites
+*   Node.js (v18+)
+*   Java JDK 17
+*   Maven
+*   MongoDB Atlas Account
 
-Maven (for backend dependency management)
+### Backend Configuration
+Update `backend/src/main/resources/application.properties`:
+```properties
+spring.data.mongodb.uri=YOUR_MONGODB_ATLAS_URI
+spring.mail.username=your-email@gmail.com
+spring.mail.password=your-app-password
+```
 
-Steps to Run the Project
+### Running Locally
+1.  **Start Backend**:
+    ```bash
+    cd backend
+    mvn spring-boot:run
+    ```
+2.  **Start Frontend**:
+    ```bash
+    cd fronend
+    npm install
+    npm start
+    ```
 
-1. Clone the Repository
+---
 
- git clone https://github.com/your-repo/ecometa.git
- cd ecometa
+## 🛡️ Security & Privacy
+*   **Password Protection**: All user passwords are encrypted using **BCrypt** before they ever hit the database.
+*   **Role Protection**: Only users logged in as "RECYCLER" can see the Recycler Dashboard. Users cannot see each other's private submissions.
 
-2. Set Up the Backend (Spring Boot)
+---
 
- cd backend
- mvn clean install
- mvn spring-boot:run
+## 🌍 Impact
+By using Ecometa, you are directly contributing to the **Circular Economy**. Every certificate issued represents hazardous minerals (Lithium, Lead, Mercury) that have been successfully diverted from nature and put back into the manufacturing cycle.
 
-Make sure MySQL is running, and update the application.properties file with your database credentials.
+---
 
-3. Set Up the Frontend (React.js)
+> [!TIP]
+> **Pro Tip**: Use the dashboard to see your total "units saved." Every gadget counts towards a healthier planet!
 
- cd frontend
- npm install
- npm start
-
-Database Schema
-
-Tables Used
-
-User Table (Stores user details)
-
-Product Table (Stores product listings)
-
-Recycler Details Table (Stores recycler shop information)
-
-API Endpoints
-
-User Management
-
-POST /api/auth/signup → Register a new user
-
-POST /api/auth/login → Authenticate user and generate token
-
-Product Management
-
-GET /api/products → Fetch all products
-
-POST /api/products → Add a new product (Seller only)
-
-GET /api/products/{region} → Get products based on region
-
-Order & Recycling Management
-
-POST /api/orders → Place an order
-
-GET /api/orders/{userId} → Get order history
-
-POST /api/recycle → Mark an item for recycling
-
-Future Enhancements
-
-Payment Integration (Razorpay/Stripe)
-
-Live Chat Support for buyers and recyclers
-
-AI-based Waste Categorization
-
-Contributors
-
-Onkar Doke (Backend & Database Design)
-
-Ankit Dovkar (Backend Developer)
-
-Aditya Patil (Frontend Developer)
-
-Swanand Nene (Frontend Developer)
-
-License
-
-
-
+Developed with ❤️ by **The Ecometa Team**.

@@ -3,6 +3,7 @@ package com.app.ecometa.controller;
 import com.app.ecometa.entity.User;
 import com.app.ecometa.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -16,22 +17,39 @@ public class UserController {
     @Autowired
     private UserRepo userRepository;
 
-    // User Registration
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    // ── Register ─────────────────────────────────────────────────────────────
+
     @PostMapping("/register")
-    public User registerUser(@RequestBody User user) {
+    public Map<String, Object> registerUser(@RequestBody User user) {
+        Map<String, Object> response = new HashMap<>();
+
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already registered!");
+            response.put("error", "Email already registered!");
+            return response;
         }
-        return userRepository.save(user);
+
+        // Hash the password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User saved = userRepository.save(user);
+
+        response.put("message", "Registration successful");
+        response.put("userId", saved.getId());
+        response.put("role", saved.getRole());
+        return response;
     }
 
-    // Get user by ID
+    // ── Get User by ID ────────────────────────────────────────────────────────
+
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    public User getUser(@PathVariable String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    // User Login without JWT
+    // ── Login ─────────────────────────────────────────────────────────────────
+
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody User loginRequest) {
         Optional<User> user = userRepository.findByEmail(loginRequest.getEmail());
@@ -43,17 +61,18 @@ public class UserController {
             return response;
         }
 
-        if (!user.get().getPassword().equals(loginRequest.getPassword())) {
+        // BCrypt password check
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.get().getPassword())) {
             response.put("error", "Invalid email or password");
             return response;
         }
 
-        // ✅ Include userId in the response
         response.put("message", "Login successful");
         response.put("role", user.get().getRole().name());
-        response.put("userId", user.get().getId()); // Ensure userId is included
+        response.put("userId", user.get().getId());
+        // token = userId for now (simple session). Can be upgraded to JWT later.
+        response.put("token", user.get().getId());
 
         return response;
     }
-
 }

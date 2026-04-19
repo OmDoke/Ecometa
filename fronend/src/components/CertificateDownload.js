@@ -11,7 +11,8 @@ const CertificateDownload = ({ userId }) => {
   useEffect(() => {
     const fetchRecycledData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/ewaste/user/${userId}`);
+        const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+        const response = await axios.get(`${API_URL}/ewaste/user/${userId}`);
         const totalRecycled = response.data
           .filter(item => item.status === "RECYCLED")
           .reduce((sum, item) => sum + item.quantity, 0);
@@ -30,8 +31,9 @@ const CertificateDownload = ({ userId }) => {
   }, [userId]);
 
   const downloadCertificate = async () => {
+    const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
     try {
-      const response = await axios.get(`http://localhost:8080/certificate/download/${userId}`, {
+      const response = await axios.get(`${API_URL}/certificate/download/${userId}`, {
         responseType: "blob",
       });
 

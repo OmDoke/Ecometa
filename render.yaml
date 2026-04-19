@@ -1,0 +1,44 @@
+services:
+  # ─── Backend Service (Java Spring Boot) ──────────────────────────────────
+  - type: web
+    name: ecometa-backend
+    env: java
+    region: singapore
+    plan: free
+    rootContext: backend
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/ecometa-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: MONGODB_URI
+        sync: false       # Set this manually in Render dashboard
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_PASS
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false       # Set to your Render frontend URL (e.g. https://ecometa.onrender.com)
+      - key: PORT
+        value: 8080
+
+  # ─── Frontend Service (React Static Site) ───────────────────────────────
+  - type: static
+    name: ecometa-frontend
+    env: static
+    region: singapore
+    plan: free
+    rootContext: fronend
+    buildCommand: npm install && npm run build
+    publishPath: build
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: REACT_APP_API_URL
+        sync: false       # Set to your Render backend URL (e.g. https://ecometa-backend.onrender.com)

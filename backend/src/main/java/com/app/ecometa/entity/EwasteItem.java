@@ -3,100 +3,61 @@ package com.app.ecometa.entity;
 import com.app.ecometa.enums.Enums.Condition;
 import com.app.ecometa.enums.Enums.EwasteType;
 import com.app.ecometa.enums.Enums.Status;
-import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-
-
-@Entity
+@Document(collection = "ewaste_items")
 public class EwasteItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Enumerated(EnumType.STRING)
-    @JsonProperty("type")  // Ensure JSON property maps correctly
+    @JsonProperty("type")
     private EwasteType type;
 
-    @Enumerated(EnumType.STRING)
-    @JsonProperty("condition") // Ensure JSON matches "condition" field
+    @Field("item_condition")
+    @JsonProperty("condition")
     private Condition item_condition;
 
     @JsonProperty("quantity")
     private int quantity;
 
-    @Enumerated(EnumType.STRING)
     @JsonProperty("status")
     private Status status;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonProperty("user")  // Ensure JSON maps correctly
+    @DBRef
+    @JsonProperty("user")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "recycler_id")
-    @JsonProperty("recycler")  // Ensure JSON maps recycler correctly
+    @DBRef
+    @JsonProperty("recycler")
     private User recycler;
 
-    // Constructors
     public EwasteItem() {}
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    // ── Getters & Setters ────────────────────────────────────────────────
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public EwasteType getType() {
-        return type;
-    }
+    public EwasteType getType() { return type; }
+    public void setType(EwasteType type) { this.type = type; }
 
-    public void setType(EwasteType type) {
-        this.type = type;
-    }
+    public Condition getItem_condition() { return item_condition; }
+    public void setItem_condition(Condition item_condition) { this.item_condition = item_condition; }
 
-    public Condition getItem_condition() {
-        return item_condition;
-    }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    public void setItem_condition(Condition item_condition) {
-        this.item_condition = item_condition;
-    }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 
-    public int getQuantity() {
-        return quantity;
-    }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public User getRecycler() {
-        return recycler;
-    }
-
-    public void setRecycler(User recycler) {
-        this.recycler = recycler;
-    }
+    public User getRecycler() { return recycler; }
+    public void setRecycler(User recycler) { this.recycler = recycler; }
 }

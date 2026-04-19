@@ -1,105 +1,54 @@
 package com.app.ecometa.entity;
 
 import com.app.ecometa.enums.Enums.Role;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Entity
+@Document(collection = "users")
 public class User {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	private String name;
-	private String email;
-	private String password;
-	private String certificateUrl; // Store a link to the generated certificate
-	private boolean isCertified; // True if certificate has been awarded
-	private int recycledAmount; // 🔹 Track recycled e-waste amount
 
-	@Enumerated(EnumType.STRING)
-	private Role role;
+    @Id
+    private String id;
 
-	public User() {
-	}
+    private String name;
 
-	// 🔹 Getter & Setter for recycledAmount
-	public int getRecycledAmount() {
-		return recycledAmount;
-	}
+    @Indexed(unique = true)
+    private String email;
 
-	public void setRecycledAmount(int recycledAmount) {
-		this.recycledAmount = recycledAmount;
-	}
+    private String password; // BCrypt hashed
 
+    private String certificateUrl;
+    private boolean isCertified;
+    private int recycledAmount;
 
-	public Long getId() {
-		return this.id;
-	}
+    private Role role;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public User() {}
 
-	public String getName() {
-		return this.name;
-	}
+    // ── Getters & Setters ────────────────────────────────────────────────
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-	public String getEmail() {
-		return this.email;
-	}
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-	public String getPassword() {
-		return this.password;
-	}
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public String getCertificateUrl() { return certificateUrl; }
+    public void setCertificateUrl(String certificateUrl) { this.certificateUrl = certificateUrl; }
 
-	public Role getRole() {
-		return this.role;
-	}
+    public boolean isCertified() { return isCertified; }
+    public void setCertified(boolean isCertified) { this.isCertified = isCertified; }
 
-	public void setRole(Role role) {
-		this.role = role;
-	}
+    public int getRecycledAmount() { return recycledAmount; }
+    public void setRecycledAmount(int recycledAmount) { this.recycledAmount = recycledAmount; }
 
-	public String getCertificateUrl() {
-		return certificateUrl;
-	}
-
-	public void setCertificateUrl(String certificateUrl) {
-		this.certificateUrl = certificateUrl;
-	}
-
-	public boolean isCertified() {
-		return isCertified;
-	}
-
-	public void setCertified(boolean isCertified) {
-		this.isCertified = isCertified;
-	}
-	
-	
-	
-
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 }
-
-
-
-
-
-

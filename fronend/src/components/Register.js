@@ -36,7 +36,8 @@ function Register() {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:8080/users/register", { name, email, password, role });
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+      await axios.post(`${API_URL}/users/register`, { name, email, password, role });
       alert("Registration successful!");
       navigate("/login");
     } catch (error) {
@@ -133,11 +134,17 @@ function Register() {
         /* Input Fields */
         .custom-input {
           background: rgba(255, 255, 255, 0.2);
-          border: none;
+          border: 1px solid rgba(255, 255, 255, 0.3);
           padding: 12px;
           border-radius: 8px;
           color: white;
-          transition: box-shadow 0.3s;
+          transition: all 0.3s;
+        }
+
+        /* Fix visibility for dropdown options */
+        .custom-input option {
+          color: #333;
+          background: white;
         }
 
         .custom-input::placeholder {

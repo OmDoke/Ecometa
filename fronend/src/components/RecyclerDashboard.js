@@ -33,7 +33,8 @@ function RecyclerDashboard() {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/ewaste/recycler/${recyclerId}`, {
+        const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+        const response = await axios.get(`${API_URL}/ewaste/recycler`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setSubmissions(response.data);
@@ -51,10 +52,11 @@ function RecyclerDashboard() {
   }, [recyclerId]);
 
   const handleAccept = async (submissionId, userId) => {
+    const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
     try {
       await axios.put(
-        `http://localhost:8080/ewaste/accept/${submissionId}`,
-        { recyclerId, userId },
+        `${API_URL}/ewaste/accept/${submissionId}?recyclerId=${recyclerId}`,
+        {},
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
       setSubmissions(submissions.filter((sub) => sub.id !== submissionId));
@@ -65,8 +67,9 @@ function RecyclerDashboard() {
   };
 
   const handleReject = async (submissionId) => {
+    const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
     try {
-      await axios.delete(`http://localhost:8080/ewaste/reject/${submissionId}`, {
+      await axios.put(`${API_URL}/ewaste/reject/${submissionId}?recyclerId=${recyclerId}`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setSubmissions(submissions.filter((sub) => sub.id !== submissionId));

@@ -1,9 +1,9 @@
 package com.app.ecometa.repository;
 
 import com.app.ecometa.entity.User;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepo extends JpaRepository<User, Long> {
-   Optional<User> findByEmail(String email);
+public interface UserRepo extends MongoRepository<User, String> {
+    Optional<User> findByEmail(String email);
 }

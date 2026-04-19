@@ -17,7 +17,7 @@ function EwasteForm() {
 
     const userId = localStorage.getItem("userId");
 
-    if (!userId || isNaN(parseInt(userId, 10))) {
+    if (!userId) {
       setMessage("User ID missing. Please re-login.");
       setVariant("danger");
       return;
@@ -34,12 +34,13 @@ function EwasteForm() {
       type: ewaste.type.toUpperCase(),
       condition: ewaste.condition.toUpperCase(),
       quantity: quantityNum,
-      user: { id: parseInt(userId, 10) },
+      user: { id: userId },
     };
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:8080/ewaste/submit", requestData, {
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+      await axios.post(`${API_URL}/ewaste/submit`, requestData, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}`, "Content-Type": "application/json" },
       });
 
