@@ -1,25 +1,24 @@
 # ─── Stage 1: Build ──────────────────────────────────────────────────────────
-# Use a Maven image to build the application
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
 
-# Copy the pom.xml and download dependencies (cached layer)
-COPY pom.xml .
+# In a monorepo, we must reference the subfolder path
+# Copy the pom.xml from the backend folder
+COPY backend/pom.xml .
 RUN mvn dependency:go-offline
 
-# Copy the source code and build the JAR
-COPY src ./src
+# Copy the source code from the backend folder
+COPY backend/src ./src
 RUN mvn package -DskipTests
 
 # ─── Stage 2: Run ────────────────────────────────────────────────────────────
-# Use a lightweight JRE image for the final container
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Copy the built JAR from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Dynamic Port handling (Render sets the PORT env var)
+# Dynamic Port handling
 ENV PORT=8080
 EXPOSE 8080
 
