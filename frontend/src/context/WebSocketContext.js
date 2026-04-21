@@ -27,11 +27,15 @@ export const WebSocketProvider = ({ children }) => {
         }
 
         let API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+        console.log(`WebSocket Debug: REACT_APP_API_URL is "${process.env.REACT_APP_API_URL}"`);
+        
         // Ensure no trailing slash for SockJS
         if (API_URL.endsWith('/')) API_URL = API_URL.slice(0, -1);
         
-        console.log(`WebSocket: Attempting connection to ${API_URL}/ws`);
-        const socket = new SockJS(`${API_URL}/ws`);
+        const socketUrl = `${API_URL}/ws`;
+        console.log(`WebSocket Status: Connecting to ${socketUrl}...`);
+        
+        const socket = new SockJS(socketUrl);
         const client = new Client({
             webSocketFactory: () => socket,
             connectHeaders: {
@@ -41,7 +45,7 @@ export const WebSocketProvider = ({ children }) => {
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
             onConnect: (frame) => {
-                console.log('WebSocket: Connected successfully!', frame);
+                console.log('WebSocket Success: Connected!', frame);
                 setConnected(true);
             },
             onStompError: (frame) => {
