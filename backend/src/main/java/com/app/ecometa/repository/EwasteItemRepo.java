@@ -12,6 +12,7 @@ public interface EwasteItemRepo extends MongoRepository<EwasteItem, String> {
     List<EwasteItem> findByUser(User user);
 
     List<EwasteItem> findByRecycler(User recycler);
+    List<EwasteItem> findByRecycler_IdAndStatus(String recyclerId, Status status);
 
     List<EwasteItem> findByStatus(Status status);
 

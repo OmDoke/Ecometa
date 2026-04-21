@@ -1,16 +1,15 @@
 package com.app.ecometa.controller;
 
 import com.app.ecometa.entity.User;
-import com.app.ecometa.repository.UserRepo;
+import com.app.ecometa.exception.EcometaException;
 import com.app.ecometa.service.CertificateService;
 import com.app.ecometa.service.EmailService;
+import com.app.ecometa.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/certificate")
@@ -20,33 +19,23 @@ public class CertificateController {
     private CertificateService certificateService;
 
     @Autowired
-    private UserRepo userRepo;
+    private UserService userService;
 
     @Autowired
     private EmailService emailService;
 
-    // ── Generate and email certificate ────────────────────────────────────────
-
     @PostMapping("/generate/{userId}")
-    public ResponseEntity<?> generateCertificate(@PathVariable String userId) {
-        Optional<User> userOpt = userRepo.findById(userId);
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("{\"error\": \"User not found\"}");
-        }
-
-        User user = userOpt.get();
+    public ResponseEntity<String> generateCertificate(@PathVariable String userId) {
+        User user = userService.getUserById(userId);
 
         if (!user.isCertified()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("{\"error\": \"User is not eligible for a certificate\"}");
+            throw new EcometaException("User is not eligible for a certificate (required amount not reached)");
         }
 
-        int recycledAmount = user.getRecycledAmount();
+        int recycledAmount = user.getRecycledCount();
         ByteArrayOutputStream certificate = certificateService.generateCertificate(user, recycledAmount);
         emailService.sendCertificate(user.getEmail(), certificate);
 
-        return ResponseEntity.ok("{\"message\": \"Certificate generated and sent successfully.\"}");
+        return ResponseEntity.ok("Certificate generated and sent successfully.");
     }
 }

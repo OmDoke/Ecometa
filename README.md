@@ -1,115 +1,111 @@
 # ♻️ Ecometa: The Intelligent E-Waste Circular Economy
 
-**Ecometa** is a state-of-the-art waste management platform designed to bridge the gap between individual e-waste generators and certified recycling centers. By providing a transparent, traceable, and rewarding ecosystem, Ecometa ensures that hazardous electronic waste is disposed of responsibly, promoting a cleaner and greener environment.
+**Ecometa** is a professional e-waste management platform designed to bridge the gap between individual generators and certified recycling centers. By providing a transparent, traceable, and rewarding ecosystem, Ecometa ensures that hazardous electronic waste is disposed of responsibly.
 
 ---
 
-## 🚀 The Vision
-Every year, millions of tons of e-waste end up in landfills, leaking toxic chemicals into the soil. **Ecometa** digitizes the recycling process, allowing users to schedule pickups, track their environmental impact, and receive official recycling certificates.
+## 🏗️ Technical Architecture
+
+Ecometa follows a modern decoupled architecture designed for high throughput and real-time responsiveness:
+
+*   **Frontend**: React.js SPA (Single Page Application) styled with **Vanilla CSS** and **React-Bootstrap**. Animations powered by **Framer Motion**.
+*   **Backend**: Spring Boot 3.2.4 REST API using **Service-Oriented Architecture (SOA)**.
+*   **Real-Time Layer**: **WebSockets (STOMP/SockJS)** for instant bidirectional communication. This ensures users receive immediate notifications when a Recycler accepts a pickup or when an automated Recycling Certificate is processed.
+*   **Database**: **MongoDB Atlas** (NoSQL) for flexible data modeling and scalable document storage.
+*   **Security**: **Spring Security** with custom **JWT (JSON Web Token)** implementation for stateless, secure authentication.
 
 ---
 
-## 🛠️ Technology Stack
+## 🔐 Security Framework
 
-| Layer | Technology | Details |
+The platform implements enterprise-standard security measures:
+1.  **JWT Authentication**: All requests are authenticated via a `Bearer <token>` header. Tokens are signed with HS256 using a server-side secret.
+2.  **Stateless Sessions**: The backend does not store session state; all identity information is extracted securely from the JWT claims.
+3.  **Role-Based Access Control (RBAC)**: Distinct permissions for `USER` and `RECYCLER` roles.
+4.  **Secure Principal Extraction**: Critical operations (like submitting waste or accepting pickups) extract the `UserID` directly from the secure `SecurityContext`, preventing "ID Spoofing" attacks.
+5.  **BCrypt Hashing**: All passwords are salted and hashed with a cost factor of 12.
+
+---
+
+## 📊 E-Waste Lifecycle (State Machine)
+
+The platform enforces a strict, resilient lifecycle to ensure data integrity and auditability across all stages of the circular economy:
+
+1.  **`SUBMITTED`**: Initial state; item is broadcast to the Recycler network.
+2.  **`CANCELLED`**: User-triggered abort before a recycler accepts the request.
+3.  **`ACCEPTED`**: Recycler claims the item; coordination for physical pickup begins.
+4.  **`FAILED_PICKUP`**: Handled edge case where the recycler cannot locate the item or user is absent; request returns to the active queue.
+5.  **`COLLECTED`**: Physical verification complete. Status change triggers automated Certificate generation.
+6.  **`RECYCLED`**: Processing complete; terminal state for the physical item.
+7.  **`REWARD_ISSUED`**: Automated event following recycling; **EcoPoints** are allocated to the user account as a financial incentive for participation.
+
+---
+
+## 🛠️ Developer Setup Guide
+
+### 1. Prerequisites
+*   **Java 17+** & Maven 3.8+
+*   **Node.js 18+** & npm
+*   **MongoDB Atlas** Cluster (with a created database named `ecometa`)
+
+### 2. Environment Variables
+Create a local `.env` file or set these in your environment:
+
+| Variable | Description | Example |
 | :--- | :--- | :--- |
-| **Frontend** | React.js | Vibrant, responsive UI with modern state management. |
-| **Backend** | Spring Boot 3.2.4 | Robust REST API built on the enterprise-grade Java framework. |
-| **Database** | MongoDB Atlas | Cloud-native NoSQL database for high scalability and flexibility. |
-| **Security** | Spring Security | BCrypt password hashing and role-based access control (RBAC). |
-| **Reporting** | iText PDF | Automated generation of Recycling Certificates. |
-| **Email** | Gmail SMTP | Real-time notifications for status updates. |
+| `MONGODB_URI` | Full connection string to Atlas | `mongodb+srv://...` |
+| `JWT_SECRET` | Base64 or plain string for signing | `U2VjdXJlS2V5...` |
+| `GMAIL_USER` | Email for SMTP notifications | `alerts@ecometa.app` |
+| `GMAIL_PASS` | **Google App Password** (Not account pass) | `abcd efgh ijkl mnop` |
+| `FRONTEND_URL` | For CORS configurations | `http://localhost:3000` |
+
+### 3. Backend Setup
+```bash
+cd backend
+mvn clean install
+mvn spring-boot:run
+```
+The API will be available at `http://localhost:8080`.
+
+### 4. Frontend Setup
+```bash
+cd frontend
+npm install
+npm start
+```
+The UI will be available at `http://localhost:3000`.
 
 ---
 
-## 👥 User Personas & Workflows
+## 📁 Repository Structure
 
-### 1. 🏠 The Individual (User)
-**Who is it?** Households or small businesses with old gadgets (phones, laptops, batteries).
-
-**The Workflow:**
-1.  **Onboarding**: Secure registration and login using encrypted credentials.
-2.  **Submission**: Upload e-waste details (type, quantity, condition, and location).
-3.  **Live Updates**: Track the status of the item (Submitted → Accepted → Collected).
-4.  **Reward**: Once collected, the user's "Recycled Count" increases.
-5.  **Certification**: Download an official **Recycling Certificate** to prove environmental contribution.
-
-### 2. 🚛 The Certified Recycler
-**Who is it?** Verified recycling facilities looking to source raw materials for processing.
-
-**The Workflow:**
-1.  **Verification**: Login to a dedicated Recycler Dashboard.
-2.  **Discovery**: View all pending e-waste submissions in their region.
-3.  **Action**: Inspect details and choose to **Accept** or **Reject** a pickup request.
-4.  **Collection**: Mark items as **Collected** once the physical pickup is completed.
-5.  **Dashboard Analytics**: Track total units collected and impact metrics.
-
-### 3. 🛡️ The System Administrator
-**The Workflow:**
-1.  **Monitoring**: Access global reports on recycling activity across the platform.
-2.  **Audit**: Ensure items are being processed fairly and recyclers are active.
-
----
-
-## 📊 App Flow (Lifecycle)
-
-```mermaid
-graph TD
-    A[User Registers/Logs In] --> B[User Submits E-Waste Form]
-    B --> C{Recycler Dashboard}
-    C -->|Rejects| D[Item Returns to Queue]
-    C -->|Accepts| E[Status: Accepted]
-    E --> F[Physical Pickup & Inspection]
-    F --> G[Recycler Marks Completed]
-    G --> H[User Notified & Downloads PDF Certificate]
-    H --> I[Total Recycled Count Increases]
+```text
+Ecometa/
+├── backend/
+│   ├── src/main/java/com/app/ecometa/
+│   │   ├── config/       # Security, JWT, WebSocket configurations
+│   │   ├── controller/   # REST Endpoints
+│   │   ├── dto/          # LoginRequest, LoginResponse, etc.
+│   │   ├── entity/       # Mongo Collections (User, EwasteItem)
+│   │   ├── enums/        # Role, Status, EwasteType
+│   │   ├── exception/    # Custom Exceptions & Global Handler
+│   │   ├── repository/   # Spring Data Repositories
+│   │   └── service/      # Business Logic (User, Ewaste, Email, Certificate)
+│   └── pom.xml
+└── frontend/             # Corrected React Application directory
+    ├── src/
+    │   ├── components/   # Real-time Dashboard, Map, Forms
+    │   ├── App.js        # Protected Routing
+    │   └── index.css     # Design System & Premium UI tokens
+    └── package.json
 ```
 
 ---
 
-## ⚙️ Installation & Local Setup
-
-### Prerequisites
-*   Node.js (v18+)
-*   Java JDK 17
-*   Maven
-*   MongoDB Atlas Account
-
-### Backend Configuration
-Update `backend/src/main/resources/application.properties`:
-```properties
-spring.data.mongodb.uri=YOUR_MONGODB_ATLAS_URI
-spring.mail.username=your-email@gmail.com
-spring.mail.password=your-app-password
-```
-
-### Running Locally
-1.  **Start Backend**:
-    ```bash
-    cd backend
-    mvn spring-boot:run
-    ```
-2.  **Start Frontend**:
-    ```bash
-    cd fronend
-    npm install
-    npm start
-    ```
+## 📜 Contribution Rules
+*   **Maintain Separation**: Business logic stays in `@Service`, never in `@RestController`.
+*   **Secure by Default**: Always use `Principal` or `SecurityContextHolder` to fetch the logged-in user in services.
+*   **Standard Responses**: All API endpoints must return `ResponseEntity`.
 
 ---
-
-## 🛡️ Security & Privacy
-*   **Password Protection**: All user passwords are encrypted using **BCrypt** before they ever hit the database.
-*   **Role Protection**: Only users logged in as "RECYCLER" can see the Recycler Dashboard. Users cannot see each other's private submissions.
-
----
-
-## 🌍 Impact
-By using Ecometa, you are directly contributing to the **Circular Economy**. Every certificate issued represents hazardous minerals (Lithium, Lead, Mercury) that have been successfully diverted from nature and put back into the manufacturing cycle.
-
----
-
-> [!TIP]
-> **Pro Tip**: Use the dashboard to see your total "units saved." Every gadget counts towards a healthier planet!
-
-Developed with ❤️ by **The Ecometa Team**.
+Developed with ❤️ by the **Ecometa Engineering Team**.

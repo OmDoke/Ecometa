@@ -1,5 +1,6 @@
 package com.app.ecometa.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -16,9 +18,11 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    // Injected from application.properties → set FRONTEND_URL env var on Render
     @Value("${frontend.url:http://localhost:3000}")
     private String frontendUrl;
+
+    @Autowired
+    private AuthFilter authFilter;
 
     public SecurityConfig() {}
 
@@ -27,12 +31,15 @@ public class SecurityConfig {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth ->
-                        ((AuthorizeHttpRequestsConfigurer.AuthorizedUrl) auth.anyRequest()).permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/users/**", "/ewaste/**", "/ws/**").permitAll() 
+                        .requestMatchers("/api/map/**").hasAnyRole("USER", "RECYCLER")
+                        .anyRequest().permitAll() 
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

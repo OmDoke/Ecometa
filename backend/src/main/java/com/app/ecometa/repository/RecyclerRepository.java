@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RecyclerRepository extends MongoRepository<Recycler, String> {
-    Recycler findByUserId(String userId);
+    Recycler findByUser_Id(String userId);
 }
