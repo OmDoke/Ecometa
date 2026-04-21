@@ -50,7 +50,6 @@ export default function RecyclerMap() {
   const [activeFilters, setActiveFilters] = useState([]);
   const [radiusKm, setRadiusKm] = useState(10);
   const [selectedRecycler, setSelectedRecycler] = useState(null);
-  const [manualCity, setManualCity] = useState("");
   const navigate = useNavigate();
 
   const deviceTypes = ["Phones", "Laptops", "Batteries", "TVs", "Appliances"];

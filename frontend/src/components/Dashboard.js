@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Row, Col, Card, Button, Spinner, Alert, Badge } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaSignOutAlt, FaPlusCircle, FaQuoteLeft, FaQuoteRight, FaRecycle, FaMapMarkerAlt, FaComments, FaCalendarAlt } from "react-icons/fa";
+import { FaPlusCircle, FaQuoteLeft, FaQuoteRight, FaRecycle, FaMapMarkerAlt, FaComments, FaCalendarAlt } from "react-icons/fa";
 import dayjs from "dayjs";
 import CertificateDownload from "./CertificateDownload";
 import ChatDrawer from "./ChatDrawer";

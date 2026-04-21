@@ -34,7 +34,7 @@ function RecyclerDashboard() {
     }
   }, [navigate]);
 
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     setLoading(true);
     setError("");
     const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
@@ -58,13 +58,13 @@ function RecyclerDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [recyclerId, token]);
 
   useEffect(() => {
     if (recyclerId && token) {
       fetchData();
     }
-  }, [recyclerId, token]);
+  }, [recyclerId, token, fetchData]);
 
   const handleAccept = async (submissionId) => {
     const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";

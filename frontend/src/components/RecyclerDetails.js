@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, Container, Spinner, Button, Form, Row, Col, Alert, Badge } from "react-bootstrap";
+import { Card, Container, Spinner, Button, Form, Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaSave, FaMapMarkerAlt, FaClock, FaCheck, FaBuilding, FaPhone, FaEnvelope } from "react-icons/fa";
+import { FaArrowLeft, FaSave, FaMapMarkerAlt, FaClock, FaCheck, FaBuilding } from "react-icons/fa";
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { motion } from "framer-motion";
